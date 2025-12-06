@@ -1,0 +1,367 @@
+\documentclass[12pt,a4paper]{article}
+
+% -----------------------------
+% PAQUETES BÁSICOS
+% -----------------------------
+\usepackage[spanish]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath, amssymb}
+\usepackage{graphicx}
+\usepackage{geometry}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{caption}
+\usepackage{float}
+\usepackage{csquotes}
+
+\geometry{margin=2.5cm}
+
+\hypersetup{
+	colorlinks=true,
+	linkcolor=blue,
+	urlcolor=blue
+}
+
+
+\begin{document}
+	
+	\begin{titlepage}
+		\centering
+		{\Large \textbf{Universidad Mayor de San Andrés}}\\
+		{\large Facultad de Ciencias Puras y Naturales}\\
+		{\large Carrera de Informática}\\[1cm]
+		
+		\includegraphics[width=6cm]{logo_umsa.png}\\[12pt]
+		
+		{\Large \textbf{Proyecto Final}}\\
+		{\Large \textbf{ Simulador de Convergencia de Metodos Iterativos}}\\[1cm]
+		
+		\textbf{Curso:} Metodos Numericos I\\[6pt]
+		\textbf{Docente:} Carlos Mullisaca Choque\\[1cm]
+		
+		\textbf{Integrantes:}\\[4pt]
+		\begin{tabular}{l}
+			- Ian Ezequiel Salinas Condori \\
+			- Marco Gabriel Mamani Laura \\
+			- Cristhian Manuel Surco Quisbert 
+		\end{tabular}
+	
+	\vfill
+	{\large \today}
+		
+	\end{titlepage}
+	
+	\tableofcontents
+	\newpage
+	
+	\section{Introducción}
+	
+	El presente trabajo tiene como finalidad desarrollar una aplicación interactiva denominada \textit{Los Convergentes}, cuyo propósito es comparar el comportamiento de distintos métodos iterativos para la búsqueda de raíces de ecuaciones no lineales.
+	
+	Los métodos iterativos son fundamentales en el análisis numérico porque permiten aproximar soluciones cuando no existe una fórmula cerrada o cuando resolver una ecuación analíticamente resulta demasiado complejo. En numerosas aplicaciones de la física, la ingeniería, la economía y la informática, aparecen ecuaciones del tipo
+	\[
+	f(x) = 0
+	\]
+	para las cuales no es posible obtener la solución exacta de manera algebraica.
+	
+	La aplicación desarrollada utiliza Python junto con las librerías \textit{Streamlit}, \textit{NumPy} y \textit{Matplotlib}, y proporciona una interfaz gráfica que permite analizar:
+	
+	\begin{itemize}
+		\item La rapidez de convergencia de cada método.
+		\item El comportamiento del error en función del número de iteraciones.
+		\item El orden de convergencia estimado.
+		\item La eficiencia computacional.
+		\item La robustez frente a diferentes condiciones iniciales.
+	\end{itemize}
+	
+	En este informe se describen los fundamentos teóricos de los métodos utilizados, el diseño de la aplicación, la metodología de pruebas, los resultados obtenidos y las conclusiones principales del estudio.
+	
+
+	\section{Objetivos}
+	
+	\subsection{Objetivo general}
+	
+	Desarrollar una herramienta interactiva que permita comparar la convergencia de cinco métodos iterativos clásicos para el cálculo de raíces de ecuaciones no lineales: Punto Fijo, Bisección, Regla Falsa, Newton--Raphson y Secante, mediante visualizaciones, tablas y análisis numéricos.
+	
+	\subsection{Objetivos específicos}
+	
+	\begin{itemize}
+		\item Implementar correctamente los algoritmos de punto fijo, bisección, regla falsa, Newton--Raphson y secante.
+		\item Visualizar el comportamiento del error en función del número de iteraciones para cada método.
+		\item Estimar y comparar el orden de convergencia aproximado de los métodos.
+		\item Analizar la eficiencia computacional mediante la medición del tiempo de ejecución.
+		\item Validar los resultados utilizando funciones de prueba con raíces conocidas.
+		\item Diseñar una interfaz gráfica intuitiva y fácil de usar para fines académicos.
+	\end{itemize}
+	
+	% -----------------------------
+	% 3. MARCO TEÓRICO
+	% -----------------------------
+	\section{Marco teórico}
+	
+	\subsection{Métodos iterativos}
+	
+	Los métodos iterativos para la resolución de ecuaciones no lineales consisten en la construcción de una sucesión
+	\[
+	\{x_n\}_{n=0}^{\infty}, \quad x_0, x_1, x_2, \ldots
+	\]
+	que, bajo ciertas condiciones, converge hacia una raíz $r$ de la ecuación
+	\[
+	f(x) = 0.
+	\]
+	Es decir, se busca que
+	\[
+	\lim_{n \to \infty} x_n = r, \quad \text{tal que } f(r) = 0.
+	\]
+	
+	Estos métodos permiten aproximar soluciones numéricas con una tolerancia previamente definida, y son especialmente útiles cuando la ecuación no puede resolverse de forma exacta o cuando la solución analítica es demasiado costosa de obtener.
+	
+	\subsection{Convergencia y error}
+	
+	Se dice que un método iterativo converge si la sucesión $\{x_n\}$ generada por el algoritmo se aproxima a la raíz $r$. El error absoluto en la iteración $n$ puede medirse como
+	\[
+	e_n = |r - x_n|
+	\]
+	o, en la práctica, a través de
+	\[
+	e_n = |f(x_n)|.
+	\]
+	
+	En la implementación presentada se emplea principalmente el error $|f(x_n)|$ como criterio para decidir si la aproximación es suficientemente buena, es decir, si
+	\[
+	|f(x_n)| < \text{tol},
+	\]
+	donde \textit{tol} es la tolerancia especificada por el usuario.
+	
+	\subsection{Orden de convergencia}
+	
+	El orden de convergencia describe la rapidez con la que disminuye el error en cada iteración. Formalmente, un método tiene orden de convergencia $p$ si se cumple que
+	\[
+	e_{n+1} \approx C e_n^p,
+	\]
+	donde $C$ es una constante positiva y $e_n$ es el error en la iteración $n$.
+	
+	En la práctica, el orden de convergencia se puede estimar a partir de los errores sucesivos mediante relaciones logarítmicas. Valores típicos son:
+	
+	\begin{itemize}
+		\item Bisección: $p \approx 1$ (convergencia lineal).
+		\item Regla Falsa: $p \approx 1$ (también lineal).
+		\item Secante: $p \approx 1{,}618$ (convergencia superlineal).
+		\item Newton--Raphson: $p \approx 2$ (convergencia cuadrática).
+	\end{itemize}
+	
+	\subsection{Descripción matemática de los métodos}
+	
+	A continuación se describen brevemente los métodos iterativos implementados.
+	
+	\subsubsection{Método de Punto Fijo}
+	
+	El método de punto fijo reescribe la ecuación $f(x) = 0$ en la forma
+	\[
+	x = g(x),
+	\]
+	y genera la sucesión
+	\[
+	x_{n+1} = g(x_n).
+	\]
+	Bajo condiciones adecuadas sobre $g$ (por ejemplo, que sea contractiva en un intervalo), la sucesión converge hacia un punto fijo $r$ tal que $r = g(r)$, que es una raíz de $f$.
+	
+	\subsubsection{Método de Bisección}
+	
+	El método de bisección parte de un intervalo $[a,b]$ tal que $f(a)f(b) < 0$, garantizando la existencia de al menos una raíz en dicho intervalo (por el teorema del valor intermedio). En cada iteración se calcula el punto medio
+	\[
+	m = \frac{a + b}{2}
+	\]
+	y se evalúa $f(m)$, seleccionando el subintervalo donde cambia de signo la función. El proceso se repite hasta que la longitud del intervalo o el valor de $|f(m)|$ sea menor que la tolerancia.
+	
+	\subsubsection{Método de Regla Falsa}
+	
+	La regla falsa (false position) también utiliza un intervalo $[a,b]$ con $f(a)f(b) < 0$, pero en lugar de usar el punto medio, emplea la intersección de la recta secante con el eje $x$:
+	\[
+	x = b - f(b)\frac{b-a}{f(b)-f(a)}.
+	\]
+	Luego se actualiza el intervalo de forma similar a la bisección, manteniendo siempre la condición de cambio de signo.
+	
+	\subsubsection{Método de Newton--Raphson}
+	
+	El método de Newton--Raphson utiliza la información de la derivada de $f$. A partir de $x_n$, se aproxima la función localmente por la recta tangente y se calcula:
+	\[
+	x_{n+1} = x_n - \frac{f(x_n)}{f'(x_n)}.
+	\]
+	Este método suele presentar convergencia cuadrática cerca de la raíz, pero requiere que la derivada no se anule y que la aproximación inicial sea adecuada.
+	
+	\subsubsection{Método de la Secante}
+	
+	El método de la secante es similar a Newton, pero no requiere derivada explícita. Utiliza dos aproximaciones anteriores $x_{n-1}$ y $x_n$ y define:
+	\[
+	x_{n+1} = x_n - f(x_n)\frac{x_n - x_{n-1}}{f(x_n) - f(x_{n-1})}.
+	\]
+	La convergencia suele ser superlineal, con un orden aproximado de $p \approx 1{,}618$.
+	
+	% -----------------------------
+	% 4. DESCRIPCIÓN DEL SISTEMA DESARROLLADO
+	% -----------------------------
+	\section{Descripción del sistema desarrollado}
+	
+	\subsection{Tecnologías utilizadas}
+	
+	La aplicación \textit{Los Convergentes} fue desarrollada en el lenguaje Python, utilizando las siguientes librerías:
+	
+	\begin{itemize}
+		\item \textbf{Streamlit}: para la construcción de la interfaz gráfica web.
+		\item \textbf{NumPy}: para operaciones numéricas.
+		\item \textbf{Matplotlib}: para la generación de gráficos.
+		\item \textbf{Pandas}: para la organización tabular de resultados.
+	\end{itemize}
+	
+	Estas herramientas son recomendadas para el desarrollo de aplicaciones numéricas interactivas debido a su facilidad de uso y amplia documentación.
+	
+	\subsection{Estructura general de la aplicación}
+	
+	El código principal se encuentra en el archivo \texttt{app.py}. En él se definen:
+	
+	\begin{itemize}
+		\item Las funciones correspondientes a cada método iterativo.
+		\item Una estructura de datos para almacenar las iteraciones, errores, tiempo de ejecución y orden de convergencia.
+		\item La interfaz gráfica con Streamlit, que incluye:
+		\begin{itemize}
+			\item Un panel lateral para la configuración de parámetros.
+			\item Un panel central con tablas y gráficos.
+		\end{itemize}
+	\end{itemize}
+	
+	\subsection{Interfaz gráfica}
+	
+	La interfaz permite al usuario:
+	
+	\begin{itemize}
+		\item Seleccionar la función de prueba.
+		\item Definir la tolerancia y el máximo de iteraciones.
+		\item Ingresar intervalos iniciales y valores iniciales $x_0$, $x_1$.
+		\item Activar o desactivar los métodos a comparar.
+		\item Visualizar tablas de resultados y gráficos de convergencia.
+	\end{itemize}
+	
+	% -----------------------------
+	% 5. METODOLOGÍA Y CASOS DE ESTUDIO
+	% -----------------------------
+	\section{Metodología y casos de estudio}
+	
+	\subsection{Funciones de prueba}
+	
+	Para evaluar el comportamiento de los métodos, se consideraron funciones de prueba clásicas, tales como:
+	
+	\begin{itemize}
+		\item $f(x) = x^2 - 2$
+		\item $f(x) = x^3 - x - 1$
+		\item $f(x) = \cos(x) - x$
+	\end{itemize}
+	
+	Estas funciones tienen raíces conocidas o ampliamente estudiadas, lo que permite validar las aproximaciones obtenidas por los métodos iterativos.
+	
+	\subsection{Parámetros iniciales}
+	
+	Para cada función se definieron:
+	
+	\begin{itemize}
+		\item Intervalos $[a,b]$ adecuados para bisección y regla falsa.
+		\item Valores iniciales $x_0$ y $x_1$ para Newton y secante.
+		\item Tolerancias típicas de $10^{-6}$ y $10^{-8}$.
+	\end{itemize}
+	
+	% -----------------------------
+	% 6. RESULTADOS Y ANÁLISIS
+	% -----------------------------
+	\section{Resultados y análisis}
+	
+	\subsection{Error vs número de iteraciones}
+	
+	Los gráficos generados por la aplicación muestran el error $|f(x_n)|$ en escala logarítmica frente al número de iteraciones. Se observa que:
+	
+	\begin{itemize}
+		\item El método de Newton--Raphson converge en pocas iteraciones.
+		\item El método de la secante presenta un comportamiento intermedio en cuanto a rapidez.
+		\item Los métodos de bisección y regla falsa requieren más iteraciones, pero son más estables.
+	\end{itemize}
+	
+	\subsection{Órdenes de convergencia estimados}
+	
+	A partir de los errores se calculó un orden de convergencia aproximado para cada método. Los valores obtenidos coinciden con la teoría:
+	
+	\begin{itemize}
+		\item Bisección y Regla Falsa con orden cercano a $1$.
+		\item Secante con orden aproximado $p \approx 1{,}6$.
+		\item Newton--Raphson con orden cercano a $2$.
+	\end{itemize}
+	
+	\subsection{Eficiencia computacional}
+	
+	La aplicación mide el tiempo de ejecución de cada método en milisegundos. En general, se comprobó que:
+	
+	\begin{itemize}
+		\item Newton--Raphson y Secante son más eficientes en términos de tiempo y número de iteraciones.
+		\item Bisección y Regla Falsa consumen más iteraciones, pero mantienen una robustez alta.
+	\end{itemize}
+	
+	\subsection{Comparación global}
+	
+	Cada método presenta ventajas y desventajas:
+	
+	\begin{itemize}
+		\item \textbf{Bisección}: siempre converge si $f(a)f(b) < 0$, pero es lento.
+		\item \textbf{Regla Falsa}: mejora parcialmente la rapidez de bisección, manteniendo el cambio de signo.
+		\item \textbf{Newton--Raphson}: muy rápido, pero requiere derivada y una buena aproximación inicial.
+		\item \textbf{Secante}: no requiere derivada y mantiene buena rapidez de convergencia.
+		\item \textbf{Punto Fijo}: depende fuertemente de la elección de $g(x)$ y puede divergir.
+	\end{itemize}
+	
+	% -----------------------------
+	% 7. VALIDACIÓN
+	% -----------------------------
+	\section{Validación}
+	
+	\subsection{Comparación con valores exactos}
+	
+	En el caso de la función $f(x) = x^2 - 2$, la raíz exacta es $\sqrt{2} \approx 1{,}414213562$. Las aproximaciones obtenidas por los distintos métodos coinciden con este valor dentro de la tolerancia definida, confirmando la correcta implementación.
+	
+	\subsection{Discusión sobre estabilidad y robustez}
+	
+	Los resultados muestran que:
+	
+	\begin{itemize}
+		\item Bisección y Regla Falsa son muy robustos, pero relativamente lentos.
+		\item Newton--Raphson y Secante son métodos rápidos, pero pueden fallar si las condiciones iniciales no son adecuadas.
+		\item El método de Punto Fijo es útil para fines didácticos, pero su comportamiento depende fuertemente de la función $g(x)$.
+	\end{itemize}
+	
+	% -----------------------------
+	% 8. CONCLUSIONES
+	% -----------------------------
+	\section{Conclusiones}
+	
+	En este trabajo se desarrolló la aplicación \textit{Los Convergentes}, que permite comparar de forma interactiva distintos métodos iterativos para el cálculo de raíces de ecuaciones no lineales. La herramienta facilita la visualización del error, del orden de convergencia y de la eficiencia computacional de cada método.
+	
+	Los resultados obtenidos son coherentes con la teoría del análisis numérico: Newton--Raphson y Secante presentan las tasas de convergencia más altas, mientras que Bisección y Regla Falsa ofrecen mayor estabilidad ante diferentes condiciones iniciales. El método de Punto Fijo, por su parte, ilustra la importancia de la elección adecuada de la función de iteración $g(x)$.
+	
+	La aplicación constituye un recurso didáctico útil para comprender el comportamiento de los métodos iterativos y puede ampliarse en trabajos futuros incorporando nuevos métodos, permitiendo la definición libre de funciones por parte del usuario, o extendiéndose a sistemas de ecuaciones no lineales.
+	
+	% -----------------------------
+	% 9. BIBLIOGRAFÍA (EJEMPLO)
+	% -----------------------------
+	\section{Bibliografía}
+	
+	\begin{itemize}
+		\item Burden, R. L., \& Faires, J. D. (2011). \textit{Análisis Numérico}. Cengage Learning.
+		\item Chapra, S. C., \& Canale, R. P. (2015). \textit{Métodos Numéricos para Ingenieros}. McGraw-Hill.
+		\item Sauer, T. (2012). \textit{Numerical Analysis}. Pearson.
+	\end{itemize}
+	
+	% -----------------------------
+	% 10. ANEXOS (OPCIONAL)
+	% -----------------------------
+	\section*{Anexos}
+	
+	En esta sección pueden incluirse capturas de pantalla de la aplicación, tablas detalladas de iteraciones y configuraciones específicas utilizadas durante las pruebas.
+	
+\end{document}

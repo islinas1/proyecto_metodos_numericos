@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# LaTeX archivos temporales
+informe/*.aux
+informe/*.log
+informe/*.out
+informe/*.toc
+informe/*.synctex.gz
+informe/*.fdb_latexmk
+informe/*.fls
+
+# VSCode
+.vscode/
